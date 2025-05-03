@@ -17,7 +17,7 @@ const AdminUsers = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get('http://localhost:5001/api/users', {
+      const res = await axios.get('https://navglobe-backend.onrender.com/api/users', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -35,7 +35,7 @@ const AdminUsers = () => {
     if (!confirm) return;
 
     try {
-      await axios.delete(`http://localhost:5001/api/users/${id}`, {
+      await axios.delete(`https://navglobe-backend.onrender.com/api/users/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -57,7 +57,7 @@ const AdminUsers = () => {
 
   const handleUpdate = async () => {
     try {
-      await axios.put(`http://localhost:5001/api/users/${editUser._id}`, editData, {
+      await axios.put(`https://navglobe-backend.onrender.com/api/users/${editUser._id}`, editData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
