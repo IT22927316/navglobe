@@ -90,6 +90,7 @@ const Hero = () => {
               Journey Through Continents <br /> Unlock Global Discoveries
             </p>
 
+            
             <Button
               id="Start Your Journey"
               title="Start Your Journey"
