@@ -8,15 +8,6 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import logoicon1 from "../assets/logo2.png";
 
-const navItems = [
-  { name: "Home", link: "/" },
-  { name: "Countries", link: "/countries" },
-  { name: "Map", link: "/regions" },
-  { name: "Currency", link: "/currency" },
-  { name: "Languages", link: "/languages" },
-  { name: "About", link: "/about" },
-];
-
 const NavBar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNavVisible, setIsNavVisible] = useState(true);
@@ -74,34 +65,33 @@ const NavBar = () => {
 
           {/* Right Section: Desktop Menu & Icons */}
           <div className="flex items-center gap-4">
-            {/* Desktop Menu */}
             <div className="hidden md:flex gap-8 items-center">
-              {navItems.map((item, index) => (
-                <a
-                  key={index}
-                  href={item.link}
-                  className="nav-hover-btn text-gray-800 hover:text-indigo-600 transition duration-300"
-                >
-                  {item.name}
-                </a>
-              ))}
+              <Link to="/" className="nav-hover-btn text-gray-800 hover:text-indigo-600 transition duration-300">
+                Home
+              </Link>
+              <Link to="/countries" className="nav-hover-btn text-gray-800 hover:text-indigo-600 transition duration-300">
+                Countries
+              </Link>
+              <Link to="/regions" className="nav-hover-btn text-gray-800 hover:text-indigo-600 transition duration-300">
+                Map
+              </Link>
+              <Link to="/currency" className="nav-hover-btn text-gray-800 hover:text-indigo-600 transition duration-300">
+                Currency
+              </Link>
+              <Link to="/languages" className="nav-hover-btn text-gray-800 hover:text-indigo-600 transition duration-300">
+                Languages
+              </Link>
+              <Link to="/about" className="nav-hover-btn text-gray-800 hover:text-indigo-600 transition duration-300">
+                About
+              </Link>
 
-              {/* Favorites Icon - only if logged in */}
               {isLoggedIn && (
                 <Link to="/favorites">
-                  <FiHeart
-                    size={22}
-                    className="text-white hover:text-indigo-600 cursor-pointer"
-                  />
+                  <FiHeart size={22} className="text-white hover:text-indigo-600 cursor-pointer" />
                 </Link>
               )}
-
-              {/* User Icon - always visible */}
               <Link to="/profile">
-                <FiUser
-                  size={22}
-                  className="text-white hover:text-indigo-600 cursor-pointer"
-                />
+                <FiUser size={22} className="text-white hover:text-indigo-600 cursor-pointer" />
               </Link>
             </div>
 
@@ -127,17 +117,26 @@ const NavBar = () => {
           )}
         >
           <div className="flex flex-col items-center space-y-4">
-            {navItems.map((item, index) => (
-              <a
-                key={index}
-                href={item.link}
-                className="text-white text-lg py-2 hover:text-indigo-300 transition duration-300"
-              >
-                {item.name}
-              </a>
-            ))}
+            <Link to="/" className="text-white text-lg py-2 hover:text-indigo-300 transition duration-300">
+              Home
+            </Link>
+            <Link to="/countries" className="text-white text-lg py-2 hover:text-indigo-300 transition duration-300">
+              Countries
+            </Link>
+            <Link to="/regions" className="text-white text-lg py-2 hover:text-indigo-300 transition duration-300">
+              Map
+            </Link>
+            <Link to="/currency" className="text-white text-lg py-2 hover:text-indigo-300 transition duration-300">
+              Currency
+            </Link>
+            <Link to="/languages" className="text-white text-lg py-2 hover:text-indigo-300 transition duration-300">
+              Languages
+            </Link>
+            <Link to="/about" className="text-white text-lg py-2 hover:text-indigo-300 transition duration-300">
+              About
+            </Link>
 
-            {/* Icons in mobile */}
+            {/* Icons */}
             <div className="flex gap-6 mt-4">
               {isLoggedIn && (
                 <Link to="/favorites">
