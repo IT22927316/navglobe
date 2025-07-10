@@ -17,14 +17,20 @@ const MainCountry = () => {
   const token = localStorage.getItem("token");
   const countriesPerPage = 12;
 
-  // Fetch countries
+  // ✅ Fetch countries (FIXED URL)
   useEffect(() => {
     const fetchCountries = async () => {
       try {
         const url = filterRegion === "All"
-          ? 'https://restcountries.com/v3.1/all'
-          : `https://restcountries.com/v3.1/region/${filterRegion.toLowerCase()}`;
-        const res = await fetch(url);
+          ? 'https://restcountries.com/v3.1/all?fields=name,capital,region,population,languages,flags,cca3'
+          : `https://restcountries.com/v3.1/region/${filterRegion.toLowerCase()}?fields=name,capital,region,population,languages,flags,cca3`;
+
+        const res = await fetch(url, {
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+
         if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
         const data = await res.json();
         setCountries(data);
@@ -36,23 +42,35 @@ const MainCountry = () => {
     fetchCountries();
   }, [filterRegion]);
 
-  // Fetch favorites
+  // ✅ Fetch user's favorites
   useEffect(() => {
     const fetchFavorites = async () => {
-      if (!token) return;
+      if (!token) {
+        console.warn("No token found. Skipping fetchFavorites.");
+        return;
+      }
+
+      console.log("Token in localStorage:", token); // Debugging
+
       try {
         const res = await API.get("/users/favorites", {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
         });
         setFavorites(res.data.favorites || []);
       } catch (err) {
-        console.error("Failed to fetch favorites");
+        console.error("Failed to fetch favorites:", err);
+        if (err.response?.status === 401) {
+          alert("Session expired. Please log in again.");
+          localStorage.removeItem("token");
+        }
       }
     };
     fetchFavorites();
   }, [token]);
 
-  // Filter on search
+  // 🔍 Filter countries on search
   useEffect(() => {
     const results = countries.filter(country =>
       country.name.common.toLowerCase().includes(searchQuery.toLowerCase())
@@ -80,7 +98,8 @@ const MainCountry = () => {
       });
       setFavorites(res.data.favorites); // updated list returned from backend
     } catch (err) {
-      alert("Failed to update favorites");
+      console.error("Failed to update favorites:", err);
+      alert("Failed to update favorites. Please try again.");
     }
   };
 

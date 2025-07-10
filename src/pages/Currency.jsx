@@ -12,14 +12,21 @@ const CurrencyPage = () => {
   const [searchCurrencyCode, setSearchCurrencyCode] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Fetch all countries on load
+  // ✅ Fetch all countries safely
   useEffect(() => {
     const fetchCountries = async () => {
       try {
-        //All Countries API endpoint
-        const res = await fetch("https://restcountries.com/v3.1/all");
+        const res = await fetch(
+          "https://restcountries.com/v3.1/all?fields=name,currencies"
+        );
+        if (!res.ok) throw new Error("Failed to fetch all countries");
         const data = await res.json();
-        setCountries(data);
+
+        if (Array.isArray(data)) {
+          setCountries(data);
+        } else {
+          console.warn("Countries API response is not an array", data);
+        }
       } catch (error) {
         console.error("Error fetching country data:", error);
       }
@@ -28,7 +35,7 @@ const CurrencyPage = () => {
     fetchCountries();
   }, []);
 
-  // Fetch countries by currency code
+  // ✅ Fetch countries by currency code
   useEffect(() => {
     const fetchByCurrency = async () => {
       if (searchCurrencyCode.trim() === "") {
@@ -37,13 +44,18 @@ const CurrencyPage = () => {
       }
       try {
         const res = await fetch(
-          //Currency API endpoint
-          `https://restcountries.com/v3.1/currency/${searchCurrencyCode.toLowerCase()}`
+          `https://restcountries.com/v3.1/currency/${searchCurrencyCode.toLowerCase()}?fields=name,currencies`
         );
         if (!res.ok) throw new Error("Invalid currency code");
         const data = await res.json();
-        setFilteredByCode(data);
-        setCurrentPage(1);
+
+        if (Array.isArray(data)) {
+          setFilteredByCode(data);
+          setCurrentPage(1);
+        } else {
+          setFilteredByCode([]);
+          console.warn("Currency API response is not an array", data);
+        }
       } catch (err) {
         setFilteredByCode([]);
         console.error("Error fetching currency-filtered data:", err);
@@ -53,18 +65,28 @@ const CurrencyPage = () => {
     fetchByCurrency();
   }, [searchCurrencyCode]);
 
-  // Select data source
-  const dataSource = filteredByCode.length > 0 ? filteredByCode : countries;
+  // ✅ Choose valid data source
+  const dataSource =
+    Array.isArray(filteredByCode) && filteredByCode.length > 0
+      ? filteredByCode
+      : Array.isArray(countries)
+      ? countries
+      : [];
 
-  // Filter by country name
+  // ✅ Filter by country name safely
   const filtered = dataSource.filter((country) =>
-    country.name.common.toLowerCase().includes(searchCountry.toLowerCase())
+    country?.name?.common
+      ?.toLowerCase()
+      .includes(searchCountry.toLowerCase())
   );
 
   // Pagination
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const currentCountries = filtered.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const currentCountries = filtered.slice(
+    startIndex,
+    startIndex + ITEMS_PER_PAGE
+  );
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -75,23 +97,23 @@ const CurrencyPage = () => {
     <>
       <Navbar />
       <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw] bg-white font-circular-web min-h-screen pt-12 pb-20">
-        <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">World Currencies</h2>
+        <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
+          World Currencies
+        </h2>
         <p className="text-center text-gray-600 mb-8">
-          Explore all currencies by country, or search by a specific currency code.
+          Explore all currencies by country, or search by a specific currency
+          code.
         </p>
 
-        {/* Filter Label + Search Inputs */}
+        {/* Filter UI */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-10 gap-6">
-          {/* Left Label */}
           <div className="text-left md:text-left">
             <label className="block text-md font-semibold text-gray-800">
               Filter Currency By
             </label>
           </div>
 
-          {/* Right Inputs */}
           <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto md:justify-end">
-            {/* Currency Code Input */}
             <input
               type="text"
               value={searchCurrencyCode}
@@ -100,7 +122,6 @@ const CurrencyPage = () => {
               className="w-full sm:w-56 border border-gray-300 rounded-md py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
 
-            {/* Country Search Input */}
             <div className="relative w-full sm:w-56">
               <input
                 type="text"
@@ -117,11 +138,11 @@ const CurrencyPage = () => {
           </div>
         </div>
 
-        {/* Country-Currency Cards */}
+        {/* Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {currentCountries.map((country) => {
-            const name = country.name?.common || "Unknown";
-            const currencies = country.currencies
+            const name = country?.name?.common || "Unknown";
+            const currencies = country?.currencies
               ? Object.entries(country.currencies)
               : [];
 
@@ -130,7 +151,9 @@ const CurrencyPage = () => {
                 key={name}
                 className="border border-gray-200 rounded-md shadow-sm p-4 hover:shadow-md transition bg-white"
               >
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">{name}</h3>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  {name}
+                </h3>
                 {currencies.length > 0 ? (
                   <ul className="text-sm text-gray-600 space-y-1">
                     {currencies.map(([code, { name: currencyName, symbol }]) => (
@@ -140,7 +163,9 @@ const CurrencyPage = () => {
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-sm text-gray-500">No currency data available</p>
+                  <p className="text-sm text-gray-500">
+                    No currency data available
+                  </p>
                 )}
               </div>
             );

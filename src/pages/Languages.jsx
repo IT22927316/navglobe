@@ -12,13 +12,18 @@ const LanguagePage = () => {
   const [searchLanguageCode, setSearchLanguageCode] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
+  // ✅ Fetch all countries safely
   useEffect(() => {
     const fetchCountries = async () => {
       try {
-        //All Countries EndPoint
-        const res = await fetch("https://restcountries.com/v3.1/all");
+        const res = await fetch("https://restcountries.com/v3.1/all?fields=name,languages");
+        if (!res.ok) throw new Error("Failed to fetch countries");
         const data = await res.json();
-        setCountries(data);
+        if (Array.isArray(data)) {
+          setCountries(data);
+        } else {
+          console.warn("Countries response is not an array", data);
+        }
       } catch (error) {
         console.error("Error fetching countries:", error);
       }
@@ -27,7 +32,7 @@ const LanguagePage = () => {
     fetchCountries();
   }, []);
 
-  // Fetch countries by language code
+  // ✅ Fetch countries by language code
   useEffect(() => {
     const fetchByLanguage = async () => {
       if (searchLanguageCode.trim() === "") {
@@ -36,13 +41,17 @@ const LanguagePage = () => {
       }
       try {
         const res = await fetch(
-          //Language code endpoint
-          `https://restcountries.com/v3.1/lang/${searchLanguageCode.toLowerCase()}`
+          `https://restcountries.com/v3.1/lang/${searchLanguageCode.toLowerCase()}?fields=name,languages`
         );
         if (!res.ok) throw new Error("Invalid language code");
         const data = await res.json();
-        setFilteredByLang(data);
-        setCurrentPage(1);
+        if (Array.isArray(data)) {
+          setFilteredByLang(data);
+          setCurrentPage(1);
+        } else {
+          setFilteredByLang([]);
+          console.warn("Language-filtered response is not an array", data);
+        }
       } catch (err) {
         setFilteredByLang([]);
         console.error("Error fetching language-filtered data:", err);
@@ -52,12 +61,19 @@ const LanguagePage = () => {
     fetchByLanguage();
   }, [searchLanguageCode]);
 
-  // Choose data source
-  const dataSource = filteredByLang.length > 0 ? filteredByLang : countries;
+  // ✅ Choose correct data source
+  const dataSource =
+    Array.isArray(filteredByLang) && filteredByLang.length > 0
+      ? filteredByLang
+      : Array.isArray(countries)
+      ? countries
+      : [];
 
-  // Filter by country name
+  // ✅ Filter by country name
   const filteredCountries = dataSource.filter((country) =>
-    country.name?.common?.toLowerCase().includes(searchCountry.toLowerCase())
+    country?.name?.common
+      ?.toLowerCase()
+      .includes(searchCountry.toLowerCase())
   );
 
   // Pagination
@@ -84,27 +100,23 @@ const LanguagePage = () => {
           Explore the primary languages spoken in each country.
         </p>
 
-        {/* Filter Row */}
+        {/* Filters */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-10 gap-6">
-          {/* Left Label */}
           <div className="text-left md:text-left">
             <label className="block text-md font-semibold text-gray-800">
               Filter Language By
             </label>
           </div>
 
-          {/* Right Inputs */}
           <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto md:justify-end">
-            {/* Language Code Input */}
             <input
               type="text"
               value={searchLanguageCode}
               onChange={(e) => setSearchLanguageCode(e.target.value)}
-              placeholder="Language code (e.g. english)"
+              placeholder="Language code (e.g. eng, fra, spa)"
               className="w-full sm:w-56 border border-gray-300 rounded-md py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
 
-            {/* Country Name Search */}
             <div className="relative w-full sm:w-56">
               <input
                 type="text"
@@ -121,11 +133,11 @@ const LanguagePage = () => {
           </div>
         </div>
 
-        {/* Language Cards */}
+        {/* Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {currentCountries.map((country) => {
-            const name = country.name?.common || "Unknown";
-            const languages = country.languages
+            const name = country?.name?.common || "Unknown";
+            const languages = country?.languages
               ? Object.values(country.languages)
               : [];
 
